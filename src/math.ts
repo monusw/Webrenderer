@@ -68,6 +68,49 @@ class Vec3 {
     }
 }
 
+//TODO: test
+class Vec4 {
+    public x: number;
+    public y: number;
+    public z: number;
+    public w: number;
+
+    constructor(_x: number = 0, _y: number = 0, _z: number = 0, _w: number = 0) {
+        this.x = _x;
+        this.y = _y;
+        this.z = _z;
+        this.w = _w;
+    }
+
+    public set(_x: number, _y: number, _z: number, _w: number = 0) {
+        this.x = _x;
+        this.y = _y;
+        this.z = _z;
+        this.w = _w;
+    }
+
+    public clone() {
+        return new Vec4(this.x, this.y, this.z, this.w);
+    }
+
+    public add(v: Vec4) {
+        this.x += v.x;
+        this.y += v.y;
+        this.z += v.z;
+        this.w += v.w;
+    }
+
+    public addScalar(s: number) {
+        this.x += s;
+        this.y += s;
+        this.z += s;
+        this.w += s;
+    }
+
+}
+
+
+// TODO: test
 class Matrix4 {
     public elements: number[] = [
         1, 0, 0, 0,
@@ -77,10 +120,10 @@ class Matrix4 {
     ];
 
     // _nij: element at row i and col j
-    constructor(_n11: number, _n12: number, _n13:number, _n14:number,
-                _n21: number, _n22: number, _n23:number, _n24:number,
-                _n31: number, _n32: number, _n33:number, _n34:number,
-                _n41: number, _n42: number, _n43:number, _n44:number ) {
+    constructor(_n11: number=1, _n12: number=0, _n13:number=0, _n14:number=0,
+                _n21: number=0, _n22: number=1, _n23:number=0, _n24:number=0,
+                _n31: number=0, _n32: number=0, _n33:number=1, _n34:number=0,
+                _n41: number=0, _n42: number=0, _n43:number=0, _n44:number=1 ) {
         this.elements[0] = _n11, this.elements[1] = _n12, this.elements[2] = _n13, this.elements[3] = _n14;
         this.elements[4] = _n21, this.elements[5] = _n22, this.elements[6] = _n23, this.elements[7] = _n24;
         this.elements[8] = _n31, this.elements[9] = _n32, this.elements[10] = _n33, this.elements[11] = _n34;
@@ -142,6 +185,29 @@ class Matrix4 {
         console.log(this.elements[4], this.elements[5], this.elements[6], this.elements[7]);
         console.log(this.elements[8], this.elements[9], this.elements[10], this.elements[11]);
         console.log(this.elements[12], this.elements[13], this.elements[14], this.elements[15]);
+    }
+
+    public mulVec4(v: Vec4): Vec4 {
+        var result = new Vec4();
+        result.x = this.elements[0] * v.x + this.elements[1] * v.y + this.elements[2] * v.z + this.elements[3] * v.w;
+        result.y = this.elements[4] * v.x + this.elements[5] * v.y + this.elements[6] * v.z + this.elements[7] * v.w;
+        result.z = this.elements[8] * v.x + this.elements[9] * v.y + this.elements[10] * v.z + this.elements[11] * v.w;
+        result.w = this.elements[12] * v.x + this.elements[13] * v.y + this.elements[14] * v.z + this.elements[15] * v.w;
+        return result;
+    }
+
+    public mulMat4(mat4: Matrix4): Matrix4 {
+        var result = new Matrix4();
+        for (var i = 0; i < 4; i++) {
+            for (var j = 0; j < 4; j++) {
+                var tmp = 0;
+                for (var t = 0; t < 4; t++) {
+                    tmp += this.elementAt(i, t) * mat4.elementAt(t, j);
+                }
+                result.elements[i*4+j] = tmp;
+            }
+        }
+        return result;
     }
 
     // swap two position's value of this elements matrix
