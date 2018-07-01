@@ -48,4 +48,41 @@ class Vec3 {
         this.y += s;
         this.z += s;
     }
+
+    public normalize() {
+        let tmp = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+        if (tmp === 0) {
+            console.warn("WebRender.Vec3: zero vector; normilize failed.")
+            return;
+        }
+        this.x /= tmp;
+        this.y /= tmp;
+        this.z /= tmp;
+    }
+
+    // return a vector (self - vec)
+    public substract(vec: Vec3): Vec3 {
+        var res = new Vec3();
+        res.x = this.x - vec.x;
+        res.y = this.y - vec.y;
+        res.z = this.z - vec.z;
+        return res;
+    }
+
+    public cross(vec: Vec3): Vec3 {
+        var ax = this.x, ay = this.y, az = this.z;
+        var bx = vec.x, by = vec.y, bz = vec.z;
+        
+        var res = new Vec3();
+
+		res.x = ay * bz - az * by;
+		res.y = az * bx - ax * bz;
+		res.z = ax * by - ay * bx;
+
+		return res;
+    }
+
+    public lengthSq() {
+        return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    }
 }

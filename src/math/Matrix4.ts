@@ -47,6 +47,53 @@ class Matrix4 {
         );
     }
 
+    /* return a view matrix that transforms world CS to camera CS
+    // NOTE: same as OPENGL, camera is always in the origin point(0, 0, 0)
+    // NOTE: so, this function return lookAt .* translate(-pos)
+     * pos: camera's positon
+     * target: target that camera to focus on (it means that the direction is [target - pos])
+     * upVec: up vector, y axis in camera's coodinate system
+     */
+    public static createLookAt(pos: Vec3, target: Vec3, upVec: Vec3): Matrix4 {
+        var z = pos.substract(target);
+
+        if (z.lengthSq() === 0) {
+            // pos and target are in the same position
+            z.z = 1;
+        }
+
+        z.normalize();
+        var x = upVec.cross(z);
+
+        if (x.lengthSq() === 0) {
+            // up and z are parallel
+            if (Math.abs(upVec.z) === 1) {
+                z.x += 0.0001;
+            } else {
+                z.z += 0.0001;
+            }
+
+            z.normalize();
+            x = upVec.cross(z);
+        }
+
+        x.normalize();
+        var y = z.cross(x);
+
+        var lookAt = new Matrix4(
+            x.x, x.y, x.z, 0,
+            y.x, y.y, y.z, 0,
+            z.x, z.y, z.z, 0,
+            0,   0,   0,   1
+        );
+
+        return lookAt.mulMat4(
+            Matrix4.createTranslate(
+                new Vec3(-pos.x, -pos.y, -pos.z)
+            )
+        );
+    }
+
     // return an unit matirx
     public static createUnitMat4(): Matrix4 {
         return new Matrix4(
@@ -171,6 +218,7 @@ class Matrix4 {
     // ONLY for debugging
     // const function
     public print() {
+        console.warn("WebRender.Matrix4: print this matrix. this function is only for debugging.")
         console.log(this.elements[0], this.elements[1], this.elements[2], this.elements[3]);
         console.log(this.elements[4], this.elements[5], this.elements[6], this.elements[7]);
         console.log(this.elements[8], this.elements[9], this.elements[10], this.elements[11]);
