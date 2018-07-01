@@ -23,3 +23,17 @@ class Vertex {
         this.color.swap(v.color);
     }
 }
+
+// y     v3    v2  v3
+// 0x  v1  v2    v1
+function sortTriangleVertex(v1: Vertex, v2: Vertex, v3: Vertex) {
+    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
+        v1.swap(v2);
+    }
+    if (v2.position.y > v3.position.y || (v2.position.y == v3.position.y && v2.position.x > v3.position.x)) {
+        v2.swap(v3);
+    }
+    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
+        v1.swap(v2);
+    }
+}

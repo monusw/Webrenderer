@@ -1,18 +1,4 @@
 "use strict";
-function interp(x1, x2, t) {
-    return x1 + (x2 - x1) * t;
-}
-function sortTriangleVertex(v1, v2, v3) {
-    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
-        v1.swap(v2);
-    }
-    if (v2.position.y > v3.position.y || (v2.position.y == v3.position.y && v2.position.x > v3.position.x)) {
-        v2.swap(v3);
-    }
-    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
-        v1.swap(v2);
-    }
-}
 var Vec3 = (function () {
     function Vec3(_x, _y, _z) {
         if (_x === void 0) { _x = 0; }

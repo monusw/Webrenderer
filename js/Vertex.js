@@ -23,3 +23,14 @@ var Vertex = (function () {
     };
     return Vertex;
 }());
+function sortTriangleVertex(v1, v2, v3) {
+    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
+        v1.swap(v2);
+    }
+    if (v2.position.y > v3.position.y || (v2.position.y == v3.position.y && v2.position.x > v3.position.x)) {
+        v2.swap(v3);
+    }
+    if (v1.position.y > v2.position.y || (v1.position.y == v2.position.y && v1.position.x > v2.position.x)) {
+        v1.swap(v2);
+    }
+}
