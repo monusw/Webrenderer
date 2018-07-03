@@ -14,6 +14,7 @@ class Vec3 {
         this.x = _x;
         this.y = _y;
         this.z = _z;
+        return this;
     }
 
     public clone() {
@@ -31,9 +32,9 @@ class Vec3 {
     }
 
     public interp(v: Vec3, t: number): Vec3 {
-        var x = interp(this.x, v.x, t);
-        var y = interp(this.y, v.y, t);
-        var z = interp(this.z, v.z, t);
+        var x = _Math.interp(this.x, v.x, t);
+        var y = _Math.interp(this.y, v.y, t);
+        var z = _Math.interp(this.z, v.z, t);
         return new Vec3(x, y, z);
     }
 
@@ -41,23 +42,33 @@ class Vec3 {
         this.x += v.x;
         this.y += v.y;
         this.z += v.z;
+        return this;
     }
 
     public addScalar(s: number) {
         this.x += s;
         this.y += s;
         this.z += s;
+        return this;
     }
 
-    public normalize() {
+    public mulScalar(s: number) {
+        this.x *= s;
+        this.y *= s;
+        this.z *= s;
+        return this;
+    }
+
+    public normalize(): Vec3 {
         let tmp = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
         if (tmp === 0) {
             console.warn("WebRender.Vec3: zero vector; normilize failed.")
-            return;
+            return this;
         }
         this.x /= tmp;
         this.y /= tmp;
         this.z /= tmp;
+        return this;
     }
 
     // return a vector (self - vec)

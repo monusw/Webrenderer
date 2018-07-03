@@ -33,6 +33,16 @@ class WebRenderer {
         this.ctx.putImageData(this.bufferData, 0, 0);
     }
 
+    public renderScene(scene: Scene, camera: Camera) {
+        this.clearBuffer();
+        for (var obj of scene.children) {
+            if (obj.type == "Box") {
+                this.drawBox(obj as Box, camera);
+            }
+        }
+        this.render();
+    }
+
     public drawPixel(x: number, y: number, color: Color, alpha = 1.0) {
         if (x > this.width || y > this.height || x < 0 || y < 0) {
             return;
@@ -46,7 +56,9 @@ class WebRenderer {
         data[index + 3] = 255 * alpha;
     }
 
-    public drawLine(v1: Vertex, v2: Vertex) {
+    public drawLine(_v1: Vertex, _v2: Vertex) {
+        var v1 = _v1.clone();
+        var v2 = _v2.clone();
         var x1 = v1.position.x;
         var y1 = v1.position.y;
         var x2 = v2.position.x;
@@ -96,7 +108,10 @@ class WebRenderer {
         }
     }
 
-    public drawTriangle(v1: Vertex, v2: Vertex, v3: Vertex) {
+    public drawTriangle(_v1: Vertex, _v2: Vertex, _v3: Vertex) {
+        var v1 = _v1.clone();
+        var v2 = _v2.clone();
+        var v3 = _v3.clone();
         sortTriangleVertex(v1, v2, v3);
         if (Math.round(v1.position.y) == Math.round(v2.position.y)) {
             this.drawBottomFlatTriangle(v1, v2, v3);
@@ -113,8 +128,83 @@ class WebRenderer {
         }
     }
 
+    public drawBoxWireframe(v_vec: Vertex[]) {
+        // top
+        this.drawSquareWireframe(v_vec[0], v_vec[1], v_vec[5], v_vec[4]);
+        // down
+        this.drawSquareWireframe(v_vec[3], v_vec[2], v_vec[6], v_vec[7]);
+        // left
+        this.drawSquareWireframe(v_vec[1], v_vec[2], v_vec[6], v_vec[5]);
+        // right
+        this.drawSquareWireframe(v_vec[0], v_vec[3], v_vec[7], v_vec[4]);
+        // front
+        this.drawSquareWireframe(v_vec[0], v_vec[1], v_vec[2], v_vec[3]);
+        // back
+        this.drawSquareWireframe(v_vec[4], v_vec[5], v_vec[6], v_vec[7]);
+    }
+
+
 
     // private functions
+
+    private drawBox(box: Box, camera: Camera) {
+        var v_vec = [];
+        var proj = camera.projectionMatrix;
+        var view = camera.viewMatrix;
+        var model = box.generateModelMatrix();
+        for (var v of box.vertices) {
+            var mat = proj.mulMat4(view).mulMat4(model);
+            var vec4 = mat.mulVec3(v.position);
+            var vec3 = new Vec3(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w);
+            vec3.addScalar(1.0).mulScalar(width / 2);
+            vec3.y = height - vec3.y;
+
+            var new_v = new Vertex(vec3.x, vec3.y, vec3.z, v.color.clone());
+            v_vec.push(new_v);
+        }
+        var triangleIndex = [
+            //top
+            0, 1, 5, 5, 4, 0,
+            // bottom
+            3, 2, 6, 6, 7, 3,
+            //left
+            1, 2, 6, 6, 5, 1,
+            //right
+            0, 3, 7, 7, 4, 0,
+            //front
+            0, 1, 2, 2, 3, 0,
+            //back 
+            4, 5, 6, 6, 7, 4
+        ];
+        if (box.wireframe) {
+            for (var i = 0; i < triangleIndex.length; i += 3) {
+                this.drawTriangleWireframe(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
+            }
+        } else {
+            //TODO: 背面消隐
+            this.drawTriangle(v_vec[0], v_vec[1], v_vec[5]);
+            this.drawTriangle(v_vec[5], v_vec[4], v_vec[0]);
+
+            this.drawTriangle(v_vec[0], v_vec[1], v_vec[2]);
+            this.drawTriangle(v_vec[2], v_vec[3], v_vec[0]);
+
+            this.drawTriangle(v_vec[0], v_vec[3], v_vec[7]);
+            this.drawTriangle(v_vec[7], v_vec[4], v_vec[0]);
+        }
+    }
+
+    private drawSquareWireframe(v1: Vertex, v2: Vertex, v3: Vertex, v4: Vertex) {
+        this.drawLine(v1, v2);
+        this.drawLine(v2, v3);
+        this.drawLine(v3, v4);
+        this.drawLine(v4, v1);
+    }
+
+    private drawTriangleWireframe(v1: Vertex, v2: Vertex, v3: Vertex) {
+        this.drawLine(v1, v2);
+        this.drawLine(v2, v3);
+        this.drawLine(v3, v1);
+    }
 
     private drawBottomFlatTriangle(v1: Vertex, v2: Vertex, v3: Vertex) {
         var startY = v1.position.y;

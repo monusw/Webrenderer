@@ -33,9 +33,9 @@ class Color {
 
 
     public interp(c: Color, t: number): Color {
-        var iR = Math.round(interp(this.r, c.r, t));
-        var iG = Math.round(interp(this.g, c.g, t));
-        var iB = Math.round(interp(this.b, c.b, t));
+        var iR = Math.round(_Math.interp(this.r, c.r, t));
+        var iG = Math.round(_Math.interp(this.g, c.g, t));
+        var iB = Math.round(_Math.interp(this.b, c.b, t));
         return new Color(iR, iG, iB);
     }
 

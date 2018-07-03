@@ -1,10 +1,14 @@
 #!/bin/sh
 
-rm -f ./js/renderer.min.js
+rm -rf ./js/*
 
 echo "Compiling ts files..."
 
 tsc
+
+if [ $? -ne 0 ]; then 
+    exit -1
+fi
 
 echo "Merging js files..."
 

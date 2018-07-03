@@ -6,7 +6,7 @@ var Vertex = (function () {
         if (z === void 0) { z = 0; }
         this.position = new Vec3(x, y, z);
         if (color === undefined) {
-            this.color = new Color(0x000000);
+            this.color = new Color(0xffffff);
         }
         else {
             this.color = color;
@@ -20,6 +20,10 @@ var Vertex = (function () {
     Vertex.prototype.swap = function (v) {
         this.position.swap(v.position);
         this.color.swap(v.color);
+    };
+    Vertex.prototype.clone = function () {
+        var v = new Vertex(this.position.x, this.position.y, this.position.z, this.color.clone());
+        return v;
     };
     return Vertex;
 }());

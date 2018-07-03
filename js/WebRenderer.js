@@ -25,6 +25,16 @@ var WebRenderer = (function () {
     WebRenderer.prototype.render = function () {
         this.ctx.putImageData(this.bufferData, 0, 0);
     };
+    WebRenderer.prototype.renderScene = function (scene, camera) {
+        this.clearBuffer();
+        for (var _i = 0, _a = scene.children; _i < _a.length; _i++) {
+            var obj = _a[_i];
+            if (obj.type == "Box") {
+                this.drawBox(obj, camera);
+            }
+        }
+        this.render();
+    };
     WebRenderer.prototype.drawPixel = function (x, y, color, alpha) {
         if (alpha === void 0) { alpha = 1.0; }
         if (x > this.width || y > this.height || x < 0 || y < 0) {
@@ -39,7 +49,9 @@ var WebRenderer = (function () {
         data[index + 2] = color.b;
         data[index + 3] = 255 * alpha;
     };
-    WebRenderer.prototype.drawLine = function (v1, v2) {
+    WebRenderer.prototype.drawLine = function (_v1, _v2) {
+        var v1 = _v1.clone();
+        var v2 = _v2.clone();
         var x1 = v1.position.x;
         var y1 = v1.position.y;
         var x2 = v2.position.x;
@@ -95,7 +107,10 @@ var WebRenderer = (function () {
             }
         }
     };
-    WebRenderer.prototype.drawTriangle = function (v1, v2, v3) {
+    WebRenderer.prototype.drawTriangle = function (_v1, _v2, _v3) {
+        var v1 = _v1.clone();
+        var v2 = _v2.clone();
+        var v3 = _v3.clone();
         sortTriangleVertex(v1, v2, v3);
         if (Math.round(v1.position.y) == Math.round(v2.position.y)) {
             this.drawBottomFlatTriangle(v1, v2, v3);
@@ -112,6 +127,62 @@ var WebRenderer = (function () {
             this.drawBottomFlatTriangle(v2, v4, v3);
             this.drawTopFlatTriangle(v1, v2, v4);
         }
+    };
+    WebRenderer.prototype.drawBoxWireframe = function (v_vec) {
+        this.drawSquareWireframe(v_vec[0], v_vec[1], v_vec[5], v_vec[4]);
+        this.drawSquareWireframe(v_vec[3], v_vec[2], v_vec[6], v_vec[7]);
+        this.drawSquareWireframe(v_vec[1], v_vec[2], v_vec[6], v_vec[5]);
+        this.drawSquareWireframe(v_vec[0], v_vec[3], v_vec[7], v_vec[4]);
+        this.drawSquareWireframe(v_vec[0], v_vec[1], v_vec[2], v_vec[3]);
+        this.drawSquareWireframe(v_vec[4], v_vec[5], v_vec[6], v_vec[7]);
+    };
+    WebRenderer.prototype.drawBox = function (box, camera) {
+        var v_vec = [];
+        var proj = camera.projectionMatrix;
+        var view = camera.viewMatrix;
+        var model = box.generateModelMatrix();
+        for (var _i = 0, _a = box.vertices; _i < _a.length; _i++) {
+            var v = _a[_i];
+            var mat = proj.mulMat4(view).mulMat4(model);
+            var vec4 = mat.mulVec3(v.position);
+            var vec3 = new Vec3(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w);
+            vec3.addScalar(1.0).mulScalar(width / 2);
+            vec3.y = height - vec3.y;
+            var new_v = new Vertex(vec3.x, vec3.y, vec3.z, v.color.clone());
+            v_vec.push(new_v);
+        }
+        var triangleIndex = [
+            0, 1, 5, 5, 4, 0,
+            3, 2, 6, 6, 7, 3,
+            1, 2, 6, 6, 5, 1,
+            0, 3, 7, 7, 4, 0,
+            0, 1, 2, 2, 3, 0,
+            4, 5, 6, 6, 7, 4
+        ];
+        if (box.wireframe) {
+            for (var i = 0; i < triangleIndex.length; i += 3) {
+                this.drawTriangleWireframe(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
+            }
+        }
+        else {
+            this.drawTriangle(v_vec[0], v_vec[1], v_vec[5]);
+            this.drawTriangle(v_vec[5], v_vec[4], v_vec[0]);
+            this.drawTriangle(v_vec[0], v_vec[1], v_vec[2]);
+            this.drawTriangle(v_vec[2], v_vec[3], v_vec[0]);
+            this.drawTriangle(v_vec[0], v_vec[3], v_vec[7]);
+            this.drawTriangle(v_vec[7], v_vec[4], v_vec[0]);
+        }
+    };
+    WebRenderer.prototype.drawSquareWireframe = function (v1, v2, v3, v4) {
+        this.drawLine(v1, v2);
+        this.drawLine(v2, v3);
+        this.drawLine(v3, v4);
+        this.drawLine(v4, v1);
+    };
+    WebRenderer.prototype.drawTriangleWireframe = function (v1, v2, v3) {
+        this.drawLine(v1, v2);
+        this.drawLine(v2, v3);
+        this.drawLine(v3, v1);
     };
     WebRenderer.prototype.drawBottomFlatTriangle = function (v1, v2, v3) {
         var startY = v1.position.y;
