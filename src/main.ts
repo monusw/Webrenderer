@@ -39,8 +39,8 @@ animate();
 function animate() {
     box2.rotation.x += 0.01;
     box2.rotation.y += 0.02;
-    box.rotation.x += 0.005;
-    box.rotation.z += 0.005;
+    box.rotation.x += 0.01;
+    // box.rotation.z += 0.005;
     renderer.renderScene(scene, camera);
 
     requestAnimationFrame(animate);
