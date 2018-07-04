@@ -54,3 +54,8 @@ function animate() {
 
     requestAnimationFrame(animate);
 }
+
+// ONLY For Testing
+// ImageLoader.load('2.jpg', function(data: ImageData) {
+//     console.log(data);
+// });
