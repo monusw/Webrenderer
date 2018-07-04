@@ -132,10 +132,13 @@ class WebRenderer {
         var v1 = _v1.clone();
         var v2 = _v2.clone();
         var v3 = _v3.clone();
+        v1.position.round();
+        v2.position.round();
+        v3.position.round();
         sortTriangleVertex(v1, v2, v3);
-        if (Math.round(v1.position.y) == Math.round(v2.position.y)) {
+        if (v1.position.y == v2.position.y) {
             this.drawBottomFlatTriangle(v1, v2, v3);
-        } else if (Math.round(v2.position.y) == Math.round(v3.position.y)) {
+        } else if (v2.position.y == v3.position.y) {
             this.drawTopFlatTriangle(v1, v2, v3);
         } else {
             var t = (v2.position.y - v1.position.y) / (v3.position.y - v1.position.y);

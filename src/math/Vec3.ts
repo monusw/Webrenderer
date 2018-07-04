@@ -75,6 +75,13 @@ class Vec3 {
         return this;
     }
 
+    public round(): Vec3 {
+        this.x = Math.round(this.x);
+        this.y = Math.round(this.y);
+        this.z = Math.round(this.z);
+        return this;
+    }
+
     // return a vector (self - vec)
     public substract(vec: Vec3): Vec3 {
         var res = new Vec3();

@@ -33,14 +33,23 @@ box2.setPosition(new Vec3(800, 0, 0));
 scene.addChild(box2);
 
 // scene.removeChild(box2)
-renderer.renderScene(scene, camera);
+
+var enableAnimate = true;
+
+canvas.onclick = function (event:any) {
+    enableAnimate = !enableAnimate;
+}
+
 
 animate();
 function animate() {
-    box2.rotation.x += 0.01;
-    box2.rotation.y += 0.02;
-    box.rotation.x += 0.01;
-    // box.rotation.z += 0.005;
+    if (enableAnimate) {
+        box2.rotation.x += 0.01;
+        box2.rotation.y += 0.02;
+        box.rotation.x += 0.01;
+        box.rotation.z += 0.02;
+    }
+    
     renderer.renderScene(scene, camera);
 
     requestAnimationFrame(animate);
