@@ -252,7 +252,7 @@ class WebRenderer {
         var y = Math.round(v1.position.y);
         var length = Math.round(v2.position.x) - x;
         for (var i = 0; i <= length; i++) {
-            var t = i / length;
+            var t = length > 0 ? i / length : 1;
             var color = v1.color.interp(v2.color, t);
             var depth = _Math.interp(v1.depth, v2.depth, t);
             this.drawPixel(x + i, y, color, 1.0, depth);
