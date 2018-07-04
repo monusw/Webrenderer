@@ -1,5 +1,9 @@
 #!/bin/sh
 
+if [ ! -d "./js" ];then
+mkdir ./js
+fi
+
 rm -rf ./js/*
 
 echo "Compiling ts files..."
