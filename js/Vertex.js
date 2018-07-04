@@ -11,18 +11,26 @@ var Vertex = (function () {
         else {
             this.color = color;
         }
+        this.depth = WebRenderer.MAX_DEPTH;
     }
     Vertex.prototype.interp = function (v, t) {
         var position = this.position.interp(v.position, t);
         var color = this.color.interp(v.color, t);
-        return new Vertex(position.x, position.y, position.z, color);
+        var depth = _Math.interp(this.depth, v.depth, t);
+        var v = new Vertex(position.x, position.y, position.z, color);
+        v.depth = depth;
+        return v;
     };
     Vertex.prototype.swap = function (v) {
         this.position.swap(v.position);
         this.color.swap(v.color);
+        var tmp = this.depth;
+        this.depth = v.depth;
+        v.depth = tmp;
     };
     Vertex.prototype.clone = function () {
         var v = new Vertex(this.position.x, this.position.y, this.position.z, this.color.clone());
+        v.depth = this.depth;
         return v;
     };
     return Vertex;
