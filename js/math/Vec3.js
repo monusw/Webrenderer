@@ -50,6 +50,9 @@ var Vec3 = (function () {
         this.z *= s;
         return this;
     };
+    Vec3.prototype.dotVec3 = function (v) {
+        return this.x * v.x + this.y * v.y + this.z * v.z;
+    };
     Vec3.prototype.normalize = function () {
         var tmp = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
         if (tmp === 0) {

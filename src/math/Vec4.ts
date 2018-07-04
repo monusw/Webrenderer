@@ -27,6 +27,10 @@ class Vec4 {
         return this;
     }
 
+    public getVec3(): Vec3 {
+        return new Vec3(this.x, this.y, this.z);
+    }
+
     public clone() {
         return new Vec4(this.x, this.y, this.z, this.w);
     }

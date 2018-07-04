@@ -26,6 +26,9 @@ var Vec4 = (function () {
         this.w = _w;
         return this;
     };
+    Vec4.prototype.getVec3 = function () {
+        return new Vec3(this.x, this.y, this.z);
+    };
     Vec4.prototype.clone = function () {
         return new Vec4(this.x, this.y, this.z, this.w);
     };

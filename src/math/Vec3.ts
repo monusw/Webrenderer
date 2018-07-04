@@ -59,6 +59,10 @@ class Vec3 {
         return this;
     }
 
+    public dotVec3(v: Vec3): number {
+        return this.x * v.x + this.y * v.y + this.z * v.z;
+    }
+
     public normalize(): Vec3 {
         let tmp = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
         if (tmp === 0) {

@@ -26,16 +26,21 @@ box.setVertexColor(3, new Color(0x0000ff));
 scene.addChild(box);
 
 var box2 = new Box(600, 600, 600);
-box2.setVertexColor(0, new Color(0xff0000));
-box2.setVertexColor(6, new Color(0x00ff00));
+// box2.setVertexColor(0, new Color(0xff0000));
+// box2.setVertexColor(6, new Color(0x00ff00));
 box2.wireframe = true;
 box2.setPosition(new Vec3(800, 0, 0));
 scene.addChild(box2);
+
+// scene.removeChild(box2)
+renderer.renderScene(scene, camera);
 
 animate();
 function animate() {
     box2.rotation.x += 0.01;
     box2.rotation.y += 0.02;
+    box.rotation.x += 0.005;
+    box.rotation.z += 0.005;
     renderer.renderScene(scene, camera);
 
     requestAnimationFrame(animate);

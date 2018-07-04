@@ -152,6 +152,31 @@ class WebRenderer {
         var proj = camera.projectionMatrix;
         var view = camera.viewMatrix;
         var model = box.generateModelMatrix();
+        var triangleIndex = [
+            //top
+            1, 0, 4, 4, 5, 1,
+            // bottom
+            7, 3, 2, 2, 6, 7,
+            //left
+            6, 2, 1, 1, 5, 6,
+            //right
+            7, 4, 0, 0, 3, 7,
+            //front
+            2, 3, 0, 0, 1, 2,
+            //back 
+            6, 5, 4, 4, 7, 6
+        ];
+        for (var i = 0; i < triangleIndex.length; i += 3) {
+            var v1_vec3 = model.mulVec3(box.vertices[triangleIndex[i]].position).getVec3();
+            var v2_vec3 = model.mulVec3(box.vertices[triangleIndex[i+1]].position).getVec3();
+            var v3_vec3 = model.mulVec3(box.vertices[triangleIndex[i+2]].position).getVec3();
+            var isBack = this.backTest(v1_vec3, v2_vec3, v3_vec3, camera.position);
+            if (isBack) {
+                triangleIndex[i] = -1;
+                triangleIndex[i+1] = -1;
+                triangleIndex[i+2] = -1;
+            }
+        }
         for (var v of box.vertices) {
             var mat = proj.mulMat4(view).mulMat4(model);
             var vec4 = mat.mulVec3(v.position);
@@ -162,34 +187,42 @@ class WebRenderer {
             var new_v = new Vertex(vec3.x, vec3.y, vec3.z, v.color.clone());
             v_vec.push(new_v);
         }
-        var triangleIndex = [
-            //top
-            0, 1, 5, 5, 4, 0,
-            // bottom
-            3, 2, 6, 6, 7, 3,
-            //left
-            1, 2, 6, 6, 5, 1,
-            //right
-            0, 3, 7, 7, 4, 0,
-            //front
-            0, 1, 2, 2, 3, 0,
-            //back 
-            4, 5, 6, 6, 7, 4
-        ];
         if (box.wireframe) {
             for (var i = 0; i < triangleIndex.length; i += 3) {
+                if (triangleIndex[i] == -1) {
+                    continue;
+                }
                 this.drawTriangleWireframe(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
             }
         } else {
-            //TODO: 背面消隐
-            this.drawTriangle(v_vec[0], v_vec[1], v_vec[5]);
-            this.drawTriangle(v_vec[5], v_vec[4], v_vec[0]);
+            //TODO: 背面消隐完善
+            for (var i = 0; i < triangleIndex.length; i+= 3) {
+                if (triangleIndex[i] == -1) {
+                    continue;
+                }
+                this.drawTriangle(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
+            }
+            // this.drawTriangle(v_vec[0], v_vec[1], v_vec[5]);
+            // this.drawTriangle(v_vec[5], v_vec[4], v_vec[0]);
 
-            this.drawTriangle(v_vec[0], v_vec[1], v_vec[2]);
-            this.drawTriangle(v_vec[2], v_vec[3], v_vec[0]);
+            // this.drawTriangle(v_vec[0], v_vec[1], v_vec[2]);
+            // this.drawTriangle(v_vec[2], v_vec[3], v_vec[0]);
 
-            this.drawTriangle(v_vec[0], v_vec[3], v_vec[7]);
-            this.drawTriangle(v_vec[7], v_vec[4], v_vec[0]);
+            // this.drawTriangle(v_vec[0], v_vec[3], v_vec[7]);
+            // this.drawTriangle(v_vec[7], v_vec[4], v_vec[0]);
+        }
+    }
+
+    private backTest(v1: Vec3, v2: Vec3, v3: Vec3, pos: Vec3): boolean {
+        var v12 = v2.substract(v1);
+        var v13 = v3.substract(v1);
+        var n = v12.cross(v13);
+        var v = v1.substract(pos);
+        // not back
+        if (n.dotVec3(v) <= 0) {
+            return false;
+        } else {
+            return true;
         }
     }
 
