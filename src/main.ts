@@ -55,7 +55,22 @@ function animate() {
     requestAnimationFrame(animate);
 }
 
-// ONLY For Testing
+// ======ONLY For Testing======
+
 // ImageLoader.load('2.jpg', function(data: ImageData) {
 //     console.log(data);
 // });
+// var mat = new Matrix4(
+//     1,24,3,4,
+//     5,6,11,8,
+//     9,10,20,12,
+//     13,14,10,16
+// );
+
+// var inv = mat.getInverse();
+// inv.print();
+// mat.print();
+
+// inv.mulMat4(mat).print();
+
+// ======Test End======

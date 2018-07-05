@@ -120,6 +120,28 @@ class Matrix4 {
         return tmat4.mulMat4(mat4);
     }
 
+    // return a scalar matrix
+    // scale: [Vec3] 3 different axis scales or [number] a scale ratio to all axis
+    // M .* (x,y,z,w) => (sx,sy,sz,w)
+    public static createScalar(scale: Vec3 | number, mat4?: Matrix4): Matrix4 {
+        if (mat4 == undefined) {
+            mat4 = Matrix4.createUnitMat4();
+        }
+
+        if (typeof scale === "number") {
+            scale = new Vec3(scale, scale, scale);
+        }
+
+        let rmat = new Matrix4(
+            scale.x, 0,       0,       0,
+            0,       scale.y, 0,       0,
+            0,       0,       scale.z, 0,
+            0,       0,       0,       1
+        );
+
+        return rmat.mulMat4(mat4);
+    }
+
     // return a rotation matrix with tha axis x, y, or z
     // all the input angles are radians
     public static createRotateX(angle: number, mat4?: Matrix4): Matrix4 {
@@ -182,6 +204,12 @@ class Matrix4 {
         return Matrix4.createTranslate(dir,this);
     }
 
+    //  return scalar matrix .* self
+    // const function
+    public scale(s: Vec3 | number): Matrix4 {
+        return Matrix4.createScalar(s, this);
+    }
+
     // return rotation matix .* self
     // const function
     public rotateX(angle: number): Matrix4 {
@@ -218,7 +246,7 @@ class Matrix4 {
     // ONLY for debugging
     // const function
     public print() {
-        console.warn("WebRender.Matrix4: print this matrix. this function is only for debugging.")
+        console.warn("WebRenderer.Matrix4: print this matrix. this function is only for debugging.")
         console.log(this.elements[0], this.elements[1], this.elements[2], this.elements[3]);
         console.log(this.elements[4], this.elements[5], this.elements[6], this.elements[7]);
         console.log(this.elements[8], this.elements[9], this.elements[10], this.elements[11]);
@@ -258,6 +286,68 @@ class Matrix4 {
             }
         }
         return result;
+    }
+
+    // return a inverted copy of self
+    // const function
+    public getInverse() {
+        var res = this.copy();
+        return res.inverse();
+    }
+
+    // return a transposed copy of self
+    // const function
+    public getTranspose(): Matrix4 {
+        var res = this.copy();
+        return res.transpose();
+    }
+
+    // invert self
+    public inverse() {
+        var me = this.elements;
+
+        var 
+        n11 = me[ 0 ], n21 = me[ 1 ], n31 = me[ 2 ], n41 = me[ 3 ],
+        n12 = me[ 4 ], n22 = me[ 5 ], n32 = me[ 6 ], n42 = me[ 7 ],
+        n13 = me[ 8 ], n23 = me[ 9 ], n33 = me[ 10 ], n43 = me[ 11 ],
+        n14 = me[ 12 ], n24 = me[ 13 ], n34 = me[ 14 ], n44 = me[ 15 ];
+
+        var
+        t11 = n23 * n34 * n42 - n24 * n33 * n42 + n24 * n32 * n43 - n22 * n34 * n43 - n23 * n32 * n44 + n22 * n33 * n44,
+        t12 = n14 * n33 * n42 - n13 * n34 * n42 - n14 * n32 * n43 + n12 * n34 * n43 + n13 * n32 * n44 - n12 * n33 * n44,
+        t13 = n13 * n24 * n42 - n14 * n23 * n42 + n14 * n22 * n43 - n12 * n24 * n43 - n13 * n22 * n44 + n12 * n23 * n44,
+        t14 = n14 * n23 * n32 - n13 * n24 * n32 - n14 * n22 * n33 + n12 * n24 * n33 + n13 * n22 * n34 - n12 * n23 * n34;
+
+        var det = n11 * t11 + n21 * t12 + n31 * t13 + n41 * t14;
+
+        if (det === 0) {
+            console.warn("WebRenderer.Matrix4: inverse() can't invert matrix, determinant is 0.");
+            return this;
+        }
+
+        var detInv = 1 / det;
+
+        this.elements[ 0 ] = t11 * detInv;
+		this.elements[ 1 ] = ( n24 * n33 * n41 - n23 * n34 * n41 - n24 * n31 * n43 + n21 * n34 * n43 + n23 * n31 * n44 - n21 * n33 * n44 ) * detInv;
+		this.elements[ 2 ] = ( n22 * n34 * n41 - n24 * n32 * n41 + n24 * n31 * n42 - n21 * n34 * n42 - n22 * n31 * n44 + n21 * n32 * n44 ) * detInv;
+		this.elements[ 3 ] = ( n23 * n32 * n41 - n22 * n33 * n41 - n23 * n31 * n42 + n21 * n33 * n42 + n22 * n31 * n43 - n21 * n32 * n43 ) * detInv;
+
+		this.elements[ 4 ] = t12 * detInv;
+		this.elements[ 5 ] = ( n13 * n34 * n41 - n14 * n33 * n41 + n14 * n31 * n43 - n11 * n34 * n43 - n13 * n31 * n44 + n11 * n33 * n44 ) * detInv;
+		this.elements[ 6 ] = ( n14 * n32 * n41 - n12 * n34 * n41 - n14 * n31 * n42 + n11 * n34 * n42 + n12 * n31 * n44 - n11 * n32 * n44 ) * detInv;
+		this.elements[ 7 ] = ( n12 * n33 * n41 - n13 * n32 * n41 + n13 * n31 * n42 - n11 * n33 * n42 - n12 * n31 * n43 + n11 * n32 * n43 ) * detInv;
+
+		this.elements[ 8 ] = t13 * detInv;
+		this.elements[ 9 ] = ( n14 * n23 * n41 - n13 * n24 * n41 - n14 * n21 * n43 + n11 * n24 * n43 + n13 * n21 * n44 - n11 * n23 * n44 ) * detInv;
+		this.elements[ 10 ] = ( n12 * n24 * n41 - n14 * n22 * n41 + n14 * n21 * n42 - n11 * n24 * n42 - n12 * n21 * n44 + n11 * n22 * n44 ) * detInv;
+		this.elements[ 11 ] = ( n13 * n22 * n41 - n12 * n23 * n41 - n13 * n21 * n42 + n11 * n23 * n42 + n12 * n21 * n43 - n11 * n22 * n43 ) * detInv;
+
+		this.elements[ 12 ] = t14 * detInv;
+		this.elements[ 13 ] = ( n13 * n24 * n31 - n14 * n23 * n31 + n14 * n21 * n33 - n11 * n24 * n33 - n13 * n21 * n34 + n11 * n23 * n34 ) * detInv;
+		this.elements[ 14 ] = ( n14 * n22 * n31 - n12 * n24 * n31 - n14 * n21 * n32 + n11 * n24 * n32 + n12 * n21 * n34 - n11 * n22 * n34 ) * detInv;
+        this.elements[ 15 ] = ( n12 * n23 * n31 - n13 * n22 * n31 + n13 * n21 * n32 - n11 * n23 * n32 - n12 * n21 * n33 + n11 * n22 * n33 ) * detInv;
+        
+        return this;
     }
 
     // transpose self

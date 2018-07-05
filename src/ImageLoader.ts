@@ -9,7 +9,7 @@ class ImageLoader {
         imageContainer.src = url;
 
         imageContainer.onload = function () {
-            console.log("ImageLoader: load image ", imageContainer.src, ' success.')
+            console.log("WebRenderer.ImageLoader: load image ", imageContainer.src, ' success.')
             var canvas = document.createElement('canvas');
             canvas.width = imageContainer.width;
             canvas.height = imageContainer.height;
