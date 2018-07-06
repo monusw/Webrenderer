@@ -197,8 +197,8 @@ class WebRenderer {
             var vertices = [box.vertices[triangleIndex[i]], box.vertices[triangleIndex[i+1]], box.vertices[triangleIndex[i+2]]];
             var normalIndex = Math.floor(i / 6);
             var normal = normalArray[normalIndex].clone();
-            var newModel = model.copy().getInverse().getTranspose();
-            normal = model.mulVec3(normal).getVec3();
+            var newModel = model.copy().getInverse().getTranspose().getMat3();
+            normal = newModel.mulVec3(normal);
             var attr = {
                 "projection": proj,
                 "view": view,
@@ -210,19 +210,6 @@ class WebRenderer {
             }
             this.vertexShader(vertices, attr, "triangle");
         }
-        // var vertices = [box.vertices[triangleIndex[0]], box.vertices[triangleIndex[1]], box.vertices[triangleIndex[2]]];
-        // var attr = {
-        //     "projection": proj,
-        //     "view": view,
-        //     "model": model,
-        //     "normal": new Vec3(0, 1.0, 0),
-        //     "light": light,
-        //     "material": box.material,
-        //     "viewPos": camera.position
-        // }
-        // this.vertexShader(vertices, attr, "triangle");
-        // var vertices2 = [box.vertices[triangleIndex[3]], box.vertices[triangleIndex[4]], box.vertices[triangleIndex[5]]];
-        // this.vertexShader(vertices2, attr, "triangle");
     }
 
     public vertexShader(vertices: Vertex[], attr: any, type: string) {
@@ -346,7 +333,7 @@ class WebRenderer {
     }
 
     public fragmentShader(frag: any, attr: any) {
-        if (attr.material === undefined) {
+        if (attr.material === undefined || attr.light == undefined) {
             var color = frag.color.mulScalar(255);
             color = new Color(color.x, color.y, color.z);
             this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, color, 1.0, frag.depth);
@@ -371,16 +358,16 @@ class WebRenderer {
                 // 漫反射
                 var lightDir = light.pos.clone().substract(fragPos).normalize();
                 var diff = Math.max(normal.dotVec3(lightDir), 0.0);
-
-                diffuse = diffuse.mulVec3(light.diffuse).mulScalar(diff);
+                diffuse = diffuse.mulVec3(lightColor).mulVec3(light.diffuse).mulScalar(diff);
 
                 // 镜面反射
                 var viewDir = viewPos.substract(fragPos).normalize();
+                var reflectDir = _Math.getRelectVec(lightDir.clone().mulScalar(-1), normal).mulScalar(-1);
+                var spec = Math.pow(Math.max(viewDir.dotVec3(reflectDir), 0), material.shininess);
+                specular = specular.mulVec3(lightColor).mulVec3(light.specular).mulScalar(spec);
 
-                var result = diffuse.add(ambient);
-
+                var result = diffuse.add(ambient).add(specular);
                 result.mulScalar(255.0);
-
                 var fragColor = new Color(result.x, result.y, result.z);
 
                 this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, fragColor, 1.0, frag.depth);
