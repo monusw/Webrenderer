@@ -417,6 +417,15 @@ class WebRenderer {
 
             var texture: Texture = material.diffuse;
             var diffuseTexture = texture.diffuse;
+
+            // ============= lyq add to avoid "possibly undefined"===============
+            if (typeof diffuseTexture === undefined) {
+                diffuseTexture = new ImageData(100, 100);
+            } else {
+                diffuseTexture = diffuseTexture as ImageData;
+            }
+            // ============= lyq add to avoid "possibly undefined"===============
+
             var x = Math.round(frag.textureCoord[0] * diffuseTexture.width);
             var y = Math.round(frag.textureCoord[1] * diffuseTexture.height);
             var index = (y*diffuseTexture.width + x) * 4;
