@@ -302,6 +302,14 @@ class Matrix4 {
         return res.transpose();
     }
 
+    public getMat3(): Matrix3 {
+        return new Matrix3(
+            this.elements[0], this.elements[1], this.elements[2], // this.elements[3]
+            this.elements[4], this.elements[5], this.elements[6], // this.elements[7]
+            this.elements[8], this.elements[9], this.elements[10] // this.elements[12]
+        );
+    }
+
     // invert self
     public inverse() {
         var me = this.elements;

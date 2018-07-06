@@ -115,26 +115,4 @@ class Vec3 {
     public lengthSq() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
     }
-
-    public static getRelectVec(inVec: Vec3, norVec: Vec3): Vec3 {
-        if (inVec.lengthSq() === 0 || norVec.lengthSq() === 0) {
-            console.log("WebRenderer._Math.getReflectVec: in vec or normal vec is zero vector.");
-            return inVec;
-        }
-
-        inVec.normalize();
-        norVec.normalize();
-
-        let cosA = inVec.x * norVec.x + inVec.y * norVec.y + inVec.z * norVec.z;
-        let len = 2 * 1 * cosA;
-        var outVec = new Vec3(
-            inVec.x + norVec.x * len,
-            inVec.y + norVec.y * len,
-            inVec.z + norVec.z * len
-        );
-
-        outVec.normalize();
-
-        return outVec;
-    }
 }
