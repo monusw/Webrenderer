@@ -185,6 +185,7 @@ class WebRenderer {
             //back 
             6, 5, 4, 4, 7, 6
         ];
+        
         var normalArray = [
             new Vec3(0, 1.0, 0),
             new Vec3(0, -1.0, 0),
@@ -192,13 +193,28 @@ class WebRenderer {
             new Vec3(1.0, 0, 0),
             new Vec3(0, 0, 1.0),
             new Vec3(0, 0, -1.0)
-        ]
+        ];
+        var textureCoordArray = [
+            // top
+            [0.0, 1.0], [1.0, 1.0], [1.0, 0.0],  [1.0, 0.0], [0.0, 0.0], [0.0, 1.0],
+            // bottom
+            [1.0, 1.0], [1.0, 0.0], [0.0, 0.0],  [0.0, 0.0], [0.0, 1.0], [1.0, 1.0],
+            // left
+            [0.0, 1.0], [1.0, 1.0], [1.0, 0.0],  [1.0, 0.0], [0.0, 0.0], [0.0, 1.0],
+            // right
+            [1.0, 1.0], [1.0, 0.0], [0.0, 0.0],  [0.0, 0.0], [0.0, 1.0], [1.0, 1.0],
+            // front
+            [0.0, 1.0], [1.0, 1.0], [1.0, 0.0],  [1.0, 0.0], [0.0, 0.0], [0.0, 1.0],
+            // back
+            [1.0, 1.0], [1.0, 0.0], [0.0, 0.0],  [0.0, 0.0], [0.0, 1.0], [1.0, 1.0]
+        ];
         for (var i = 0; i < triangleIndex.length; i+=3) {
             var vertices = [box.vertices[triangleIndex[i]], box.vertices[triangleIndex[i+1]], box.vertices[triangleIndex[i+2]]];
             var normalIndex = Math.floor(i / 6);
             var normal = normalArray[normalIndex].clone();
             var newModel = model.copy().getInverse().getTranspose().getMat3();
             normal = newModel.mulVec3(normal);
+            var textureCoord = [textureCoordArray[i], textureCoordArray[i+1], textureCoordArray[i+2]];
             var attr = {
                 "projection": proj,
                 "view": view,
@@ -206,7 +222,8 @@ class WebRenderer {
                 "normal": normal,
                 "light": light,
                 "material": box.material,
-                "viewPos": camera.position
+                "viewPos": camera.position,
+                "textureCoord": textureCoord
             }
             this.vertexShader(vertices, attr, "triangle");
         }
@@ -217,11 +234,13 @@ class WebRenderer {
         for (var i = 0; i < vertices.length; i++) {
             var gl_Position = attr.projection.mulMat4(attr.view).mulMat4(attr.model).mulVec3(vertices[i].position);
             var fragPos = attr.model.mulVec3(vertices[i].position).getVec3();
+            var textureCoord = attr.textureCoord[i];
             var gl_Vertex = {
                 "gl_Position": gl_Position,
                 "fragPos": fragPos,
-                "color": vertices[i].color.normalize()
-            }
+                "color": vertices[i].color.normalize(),
+                "textureCoord": textureCoord
+            };
             gl_Vertices.push(gl_Vertex);
         }
         var geo_Attr = {
@@ -254,11 +273,14 @@ class WebRenderer {
             this.drawTopFlatTrianglePipline([v1, v2, v3], attr);
         } else {
             var t = (v2.gl_Position.y - v1.gl_Position.y) / (v3.gl_Position.y - v1.gl_Position.y);
-            var v4: any = {};
-            v4.gl_Position = v1.gl_Position.interp(v3.gl_Position, t).round();
-            v4.fragPos = v1.fragPos.interp(v3.fragPos, t);
-            v4.color = v1.color.interp(v3.color, t);
-            v4.depth = _Math.interp(v1.depth, v3.depth, t);
+            var textureCoord = [_Math.interp(v1.textureCoord[0], v3.textureCoord[0], t), _Math.interp(v1.textureCoord[1], v3.textureCoord[1], t)];
+            var v4 = {
+                "gl_Position": v1.gl_Position.interp(v3.gl_Position, t).round(),
+                "fragPos": v1.fragPos.interp(v3.fragPos, t),
+                "color": v1.color.interp(v3.color, t),
+                "textureCoord": textureCoord,
+                "depth": _Math.interp(v1.depth, v3.depth, t)
+            }
             if (v4.gl_Position.x < v2.gl_Position.x) {
                 var tmp = v4;
                 v4 = v2;
@@ -277,16 +299,22 @@ class WebRenderer {
         var endY = v3.gl_Position.y;
         for (var y = startY; y <= endY; y++) {
             var t = (y- startY) / (endY - startY);
-            var vl: any = {};
-            vl.gl_Position = v1.gl_Position.interp(v3.gl_Position, t).round();
-            vl.fragPos = v1.fragPos.interp(v3.fragPos, t);
-            vl.color = v1.color.interp(v3.color, t);
-            vl.depth = _Math.interp(v1.depth, v3.depth, t);
-            var vr: any = {};
-            vr.gl_Position = v2.gl_Position.interp(v3.gl_Position, t).round();
-            vr.fragPos = v2.fragPos.interp(v3.fragPos, t);
-            vr.color = v2.color.interp(v3.color, t);
-            vr.depth = _Math.interp(v2.depth, v3.depth, t);
+            var vl_textureCoord = [_Math.interp(v1.textureCoord[0], v3.textureCoord[0], t), _Math.interp(v1.textureCoord[1], v3.textureCoord[1], t)];
+            var vl = {
+                "gl_Position": v1.gl_Position.interp(v3.gl_Position, t).round(),
+                "fragPos": v1.fragPos.interp(v3.fragPos, t),
+                "color": v1.color.interp(v3.color, t),
+                "depth": _Math.interp(v1.depth, v3.depth, t),
+                "textureCoord": vl_textureCoord
+            };
+            var vr_textureCoord = [_Math.interp(v2.textureCoord[0], v3.textureCoord[0], t), _Math.interp(v2.textureCoord[1], v3.textureCoord[1], t)];
+            var vr = {
+                "gl_Position": v2.gl_Position.interp(v3.gl_Position, t).round(),
+                "fragPos": v2.fragPos.interp(v3.fragPos, t),
+                "color": v2.color.interp(v3.color, t),
+                "depth": _Math.interp(v2.depth, v3.depth, t),
+                "textureCoord": vr_textureCoord
+            }
             this.drawScanLinePipline(vl, vr, attr);
         }
     }
@@ -299,16 +327,22 @@ class WebRenderer {
         var endY = v3.gl_Position.y;
         for (var y = startY; y <= endY; y++) {
             var t = (y - startY) / (endY - startY);
-            var vl: any = {};
-            vl.gl_Position = v1.gl_Position.interp(v2.gl_Position, t).round();
-            vl.fragPos = v1.fragPos.interp(v2.fragPos, t);
-            vl.color = v1.color.interp(v2.color, t);
-            vl.depth = _Math.interp(v1.depth, v2.depth, t);
-            var vr: any = {};
-            vr.gl_Position = v1.gl_Position.interp(v3.gl_Position, t).round();
-            vr.fragPos = v1.fragPos.interp(v3.fragPos, t);
-            vr.color = v1.color.interp(v3.color, t);
-            vr.depth = _Math.interp(v1.depth, v3.depth, t);
+            var vl_textureCoord = [_Math.interp(v1.textureCoord[0], v2.textureCoord[0], t), _Math.interp(v1.textureCoord[1], v2.textureCoord[1], t)];
+            var vl = {
+                "gl_Position": v1.gl_Position.interp(v2.gl_Position, t).round(),
+                "fragPos": v1.fragPos.interp(v2.fragPos, t),
+                "color": v1.color.interp(v2.color, t),
+                "depth": _Math.interp(v1.depth, v2.depth, t),
+                "textureCoord": vl_textureCoord
+            }
+            var vr_textureCoord = [_Math.interp(v1.textureCoord[0], v3.textureCoord[0], t), _Math.interp(v1.textureCoord[1], v3.textureCoord[1], t)];
+            var vr = {
+                "gl_Position": v1.gl_Position.interp(v3.gl_Position, t).round(),
+                "fragPos": v1.fragPos.interp(v3.fragPos, t),
+                "color": v1.color.interp(v3.color, t),
+                "depth": _Math.interp(v1.depth, v3.depth, t),
+                "textureCoord": vr_textureCoord
+            }
             this.drawScanLinePipline(vl, vr, attr);
         }
     }
@@ -319,13 +353,16 @@ class WebRenderer {
         var length = Math.round(v2.gl_Position.x) - x;
         for (var i = 0; i <= length; i++) {
             var t = length > 0 ? i / length : 1;
-            var frag: any = {};
             var color = v1.color.interp(v2.color, t);
             var depth = _Math.interp(v1.depth, v2.depth, t);
-            frag.gl_Position = new Vec3(x+i, y, 0);
-            frag.fragPos = v1.fragPos.interp(v2.fragPos, t);
-            frag.color = color;
-            frag.depth = depth;
+            var textureCoord = [_Math.interp(v1.textureCoord[0], v2.textureCoord[0], t), _Math.interp(v1.textureCoord[1], v2.textureCoord[1], t)];
+            var frag = {
+                "gl_Position": new Vec3(x + i, y, 0),
+                "fragPos": v1.fragPos.interp(v2.fragPos, t),
+                "color": color,
+                "depth": depth,
+                "textureCoord": textureCoord
+            }
             this.fragmentShader(frag, attr);
             // color = color.mulScalar(255);
             // this.drawPixel(x + i, y, new Color(color.x, color.y, color.z), 1.0, depth);
@@ -351,30 +388,77 @@ class WebRenderer {
 
             var lightColor = light.lightColor.normalize();
 
-            if (light.type = Light.POINT_LIGHT) {
-                // 环境光
-                ambient = ambient.mulVec3(lightColor).mulVec3(light.ambient);
+            // 环境光
+            ambient = ambient.mulVec3(lightColor).mulVec3(light.ambient);
 
-                // 漫反射
-                var lightDir = light.pos.clone().substract(fragPos).normalize();
-                var diff = Math.max(normal.dotVec3(lightDir), 0.0);
-                diffuse = diffuse.mulVec3(lightColor).mulVec3(light.diffuse).mulScalar(diff);
-
-                // 镜面反射
-                var viewDir = viewPos.substract(fragPos).normalize();
-                var reflectDir = _Math.getRelectVec(lightDir.clone().mulScalar(-1), normal).mulScalar(-1);
-                var spec = Math.pow(Math.max(viewDir.dotVec3(reflectDir), 0), material.shininess);
-                specular = specular.mulVec3(lightColor).mulVec3(light.specular).mulScalar(spec);
-
-                var result = diffuse.add(ambient).add(specular);
-                result.mulScalar(255.0);
-                var fragColor = new Color(result.x, result.y, result.z);
-
-                this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, fragColor, 1.0, frag.depth);
-                
+            // 漫反射
+            var lightDir = light.pos.clone().substract(fragPos).normalize();
+            if (light.type == Light.DIRECTION_LIGHT) {
+                lightDir = light.dir.clone().mulScalar(-1).normalize();
             }
-                   
-            // this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, color, 1.0, frag.depth);
+            
+            var diff = Math.max(normal.dotVec3(lightDir), 0.0);
+            diffuse = diffuse.mulVec3(lightColor).mulVec3(light.diffuse).mulScalar(diff);
+
+            // 镜面反射
+            var viewDir = viewPos.substract(fragPos).normalize();
+            var reflectDir = _Math.getRelectVec(lightDir.clone().mulScalar(-1), normal).mulScalar(-1);
+            var spec = Math.pow(Math.max(viewDir.dotVec3(reflectDir), 0), material.shininess);
+            specular = specular.mulVec3(lightColor).mulVec3(light.specular).mulScalar(spec);
+
+            var result = diffuse.add(ambient).add(specular);
+            result.mulScalar(255.0);
+            var fragColor = new Color(result.x, result.y, result.z);
+
+            this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, fragColor, 1.0, frag.depth);
+                
+        } else if (material.diffuse.type === "Texture") {
+            var lightColor = light.lightColor.normalize();
+
+            var texture: Texture = material.diffuse;
+            var diffuseTexture = texture.diffuse;
+            var x = Math.round(frag.textureCoord[0] * diffuseTexture.width);
+            var y = Math.round(frag.textureCoord[1] * diffuseTexture.height);
+            var index = (y*diffuseTexture.width + x) * 4;
+            var texColor = new Color(diffuseTexture.data[index], diffuseTexture.data[index+1], diffuseTexture.data[index+2]);
+
+            var diffuseColor = texColor.normalize();
+
+            var specularColor: Vec3 = lightColor.clone();
+            if (texture.specular !== undefined) {
+                var specularTexture = texture.specular;
+                var x = Math.round(frag.textureCoord[0] * specularTexture.width);
+                var y = Math.round(frag.textureCoord[1] * specularTexture.height);
+                var index = (y * specularTexture.width + x) * 4;
+                var texSpecColor = new Color(specularTexture.data[index], specularTexture.data[index+1], specularTexture.data[index+2]);
+                specularColor = texSpecColor.normalize();
+            }
+
+            // 环境光
+            var ambientColor = diffuseColor.clone();
+            ambientColor = ambientColor.mulVec3(lightColor).mulVec3(light.ambient);
+
+            // 漫反射纹理
+            var lightDir = light.pos.clone().substract(fragPos).normalize();
+            if (light.type == Light.DIRECTION_LIGHT) {
+                lightDir = light.dir.clone().mulScalar(-1).normalize();
+            }
+            var diff = Math.max(normal.dotVec3(lightDir), 0.0);
+            diffuseColor = diffuseColor.mulVec3(lightColor).mulVec3(light.diffuse).mulScalar(diff);
+
+            // 镜面纹理
+            var viewDir = viewPos.substract(fragPos).normalize();
+            var reflectDir = _Math.getRelectVec(lightDir.clone().mulScalar(-1), normal).mulScalar(-1);
+            var spec = Math.pow(Math.max(viewDir.dotVec3(reflectDir), 0), material.shininess);
+            specularColor = specularColor.mulVec3(lightColor).mulVec3(light.specular).mulScalar(spec);
+
+
+            var resultColor = diffuseColor.add(ambientColor).add(specularColor);
+            resultColor = resultColor.mulScalar(255.0);
+            var fragColor = new Color(resultColor.x, resultColor.y, resultColor.z);
+
+
+            this.drawPixel(frag.gl_Position.x, frag.gl_Position.y, fragColor, 1.0, frag.depth);
         }
     }
 
@@ -407,8 +491,6 @@ class WebRenderer {
     // private functions
 
     private drawBox(box: Box, camera: Camera, light?: Light) {
-        this.drawBoxPipLine(box, camera ,light);
-        return;
         var v_vec = [];
         var proj = camera.projectionMatrix;
         var view = camera.viewMatrix;
@@ -443,9 +525,7 @@ class WebRenderer {
                 this.drawTriangleWireframe(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
             }
         } else {
-            for (var i = 0; i < triangleIndex.length; i+= 3) {
-                this.drawTriangle(v_vec[triangleIndex[i]], v_vec[triangleIndex[i + 1]], v_vec[triangleIndex[i + 2]]);
-            }
+            this.drawBoxPipLine(box, camera, light);
         }
     }
 

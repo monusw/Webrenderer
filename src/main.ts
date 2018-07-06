@@ -3,16 +3,6 @@ var width = 800;
 var height = 800;
 var renderer = new WebRenderer(canvas, width, height);
 
-// var v1 = new Vertex(0, 0, 0, new Color(0xff0000));
-// var v2 = new Vertex(0, 200, 0, new Color(0x00ff00));
-// var v3 = new Vertex(200, 100, 0, new Color(0x0000ff));
-
-// renderer.drawTriangle(v1, v2, v3);
-// renderer.drawLine(v1, v2);
-// renderer.drawLine(v2, v3);
-// renderer.drawLine(v3, v1);
-
-
 var scene = new Scene();
 var camera = new Camera(_Math.radians(45.0), width/height, 10, 80000);
 camera.lookAt(new Vec3(2400, 1600, 4000), new Vec3(0, 0, 0), new Vec3(0, 1, 0));
@@ -31,25 +21,36 @@ var box2 = new Box(600, 600, 600);
 box2.wireframe = true;
 box2.setPosition(new Vec3(800, 0, 0));
 scene.addChild(box2);
-scene.removeChild(box2)
 
 var light = new Light(new Color(0xffffff), Light.POINT_LIGHT);
 light.pos.set(2400, 1600, 2400);
+light.dir.set(-2400, -1600, -2400);
 scene.light = light;
 
-var material = new Material();
-material.diffuse = new Color(0xffffff).mulVec3(new Vec3(1.0, 0.5, 0.31));
-box.material = material;
+var material1 = new Material();
+material1.diffuse = new Color(0xffffff).mulVec3(new Vec3(1.0, 0.5, 0.31));
+box.material = material1;
+
+box2.material = material1;
 
 var enableAnimate = true;
 
 canvas.onclick = function (event:any) {
     enableAnimate = !enableAnimate;
 }
-box.rotation.x += 0.5;
-renderer.renderScene(scene, camera);
 
-animate();
+ImageLoader.load("assets/container.png", function (img1: ImageData) {
+    ImageLoader.load("assets/container_specular.png", function (img2: ImageData) {
+        var texture = new Texture(img1, img2);
+        var material2 = new Material();
+        material2.diffuse = texture;
+        material2.shininess = 16;
+        box.material = material2;
+        // box.material = material1;
+        animate();
+    }); 
+});
+
 function animate() {
     if (enableAnimate) {
         box2.rotation.x += 0.01;
@@ -62,6 +63,7 @@ function animate() {
 
     requestAnimationFrame(animate);
 }
+
 
 // ======ONLY For Testing======
 
