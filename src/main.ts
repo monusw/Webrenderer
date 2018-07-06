@@ -31,8 +31,15 @@ var box2 = new Box(600, 600, 600);
 box2.wireframe = true;
 box2.setPosition(new Vec3(800, 0, 0));
 scene.addChild(box2);
+scene.removeChild(box2)
 
-// scene.removeChild(box2)
+var light = new Light(new Color(0xffffff), Light.POINT_LIGHT);
+light.pos.set(2400, 1600, 2400);
+scene.light = light;
+
+var material = new Material();
+material.diffuse = new Color(0xffffff).mulVec3(new Vec3(1.0, 0.5, 0.31));
+box.material = material;
 
 var enableAnimate = true;
 
@@ -40,6 +47,7 @@ canvas.onclick = function (event:any) {
     enableAnimate = !enableAnimate;
 }
 
+// renderer.renderScene(scene, camera);
 
 animate();
 function animate() {

@@ -2,6 +2,8 @@ class Scene {
 
     public children: Object3D[];
 
+    public light?: Light;
+
     constructor() {
         this.children = [];
     }

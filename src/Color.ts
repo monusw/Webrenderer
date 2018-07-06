@@ -4,6 +4,8 @@ class Color {
     public g: number = 0;
     public b: number = 0;
 
+    public type: string = "Color";
+
     constructor(r: any, g?: any, b?: any) {
         if (g === undefined && b === undefined) {
             this.set(r);
@@ -51,5 +53,29 @@ class Color {
         this.r = tmp.r;
         this.g = tmp.g;
         this.b = tmp.b;
+    }
+
+    public mulScalar(s: number): Color {
+        this.r *= s;
+        this.g *= s;
+        this.b *= s;
+        return this;
+    }
+
+    public mulVec3(v: Vec3): Color {
+        var result = new Color(0xffffff);
+        result.r = this.r * v.x;
+        result.g = this.g * v.y;
+        result.b = this.b * v.z;
+        return result;
+    }
+
+    public mul(c: Color): Color {
+        var max = 255;
+        var result = new Color(0xffffff);
+        result.r = this.r*c.r/max;
+        result.g = this.g*c.g/max;
+        result.b = this.b*c.b/max;
+        return result;
     }
 }

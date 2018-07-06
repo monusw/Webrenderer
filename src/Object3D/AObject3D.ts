@@ -6,6 +6,8 @@ class Object3D {
 
     public modelMatrix: Matrix4;
 
+    public material?: Material;
+
     constructor(_type: string = "Object3D") {
         this.type = _type;
         this.wireframe = false;

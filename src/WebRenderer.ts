@@ -45,7 +45,7 @@ class WebRenderer {
         this.clearBuffer();
         for (var obj of scene.children) {
             if (obj.type == "Box") {
-                this.drawBox(obj as Box, camera);
+                this.drawBox(obj as Box, camera, scene.light);
             }
         }
         this.render();
@@ -170,7 +170,7 @@ class WebRenderer {
 
     // private functions
 
-    private drawBox(box: Box, camera: Camera) {
+    private drawBox(box: Box, camera: Camera, light?: Light) {
         var v_vec = [];
         var proj = camera.projectionMatrix;
         var view = camera.viewMatrix;
