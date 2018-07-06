@@ -46,7 +46,9 @@ ImageLoader.load("assets/container.png", function (img1: ImageData) {
         material2.diffuse = texture;
         material2.shininess = 16;
         box.material = material2;
-        // box.material = material1;
+// uncomment to see different result;
+        // box.material = undefined;
+        // scene.removeChild(box2);
         animate();
     }); 
 });
