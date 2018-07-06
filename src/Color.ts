@@ -78,4 +78,9 @@ class Color {
         result.b = this.b*c.b/max;
         return result;
     }
+
+    public normalize(): Vec3 {
+        var max = 255.0;
+        return new Vec3(this.r / max, this.g / max, this.b / max);
+    }
 }

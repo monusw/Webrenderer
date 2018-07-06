@@ -46,7 +46,7 @@ var enableAnimate = true;
 canvas.onclick = function (event:any) {
     enableAnimate = !enableAnimate;
 }
-
+// box.rotation.x += 0.5;
 // renderer.renderScene(scene, camera);
 
 animate();

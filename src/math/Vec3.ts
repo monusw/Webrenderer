@@ -63,6 +63,14 @@ class Vec3 {
         return this.x * v.x + this.y * v.y + this.z * v.z;
     }
 
+    public mulVec3(v: Vec3): Vec3 {
+        var res = new Vec3();
+        res.x = this.x * v.x;
+        res.y = this.y * v.y;
+        res.z = this.z * v.z;
+        return res;
+    }
+
     public normalize(): Vec3 {
         let tmp = Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
         if (tmp === 0) {
@@ -106,5 +114,27 @@ class Vec3 {
 
     public lengthSq() {
         return Math.sqrt(this.x * this.x + this.y * this.y + this.z * this.z);
+    }
+
+    public static getRelectVec(inVec: Vec3, norVec: Vec3): Vec3 {
+        if (inVec.lengthSq() === 0 || norVec.lengthSq() === 0) {
+            console.log("WebRenderer._Math.getReflectVec: in vec or normal vec is zero vector.");
+            return inVec;
+        }
+
+        inVec.normalize();
+        norVec.normalize();
+
+        let cosA = inVec.x * norVec.x + inVec.y * norVec.y + inVec.z * norVec.z;
+        let len = 2 * 1 * cosA;
+        var outVec = new Vec3(
+            inVec.x + norVec.x * len,
+            inVec.y + norVec.y * len,
+            inVec.z + norVec.z * len
+        );
+
+        outVec.normalize();
+
+        return outVec;
     }
 }
