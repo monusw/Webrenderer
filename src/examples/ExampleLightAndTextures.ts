@@ -7,7 +7,7 @@ class ExampleLightAndTextures {
 
         var scene = new Scene();
         var camera = new Camera(_Math.radians(45.0), width/height, 10, 80000);
-        camera.lookAt(new Vec3(2400, 1600, 4000), new Vec3(0, 0, 0), new Vec3(0, 1, 0));
+        camera.lookAt(new Vec3(0, 1600, 4000), new Vec3(0, 0, 0), new Vec3(0, 1, 0));
 
         var box = new Box(800, 800, 800);
         box.setVertexColor(0, new Color(0xff0000));
@@ -18,7 +18,7 @@ class ExampleLightAndTextures {
 
         var box2 = new Box(600, 600, 600);
         box2.wireframe = true;
-        box2.setPosition(new Vec3(800, 0, 0));
+        box2.setPosition(new Vec3(1200, 0, 0));
         scene.addChild(box2);
 
         var light = new Light(new Color(0xffffff), Light.POINT_LIGHT);
