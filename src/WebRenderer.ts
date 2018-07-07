@@ -46,6 +46,8 @@ class WebRenderer {
         for (var obj of scene.children) {
             if (obj.type == "Box") {
                 this.drawBox(obj as Box, camera, scene.light);
+            } else {
+                console.warn("WebRenderer.renderScene: Only drawBox available.");
             }
         }
         this.render();
@@ -187,12 +189,12 @@ class WebRenderer {
         ];
         
         var normalArray = [
-            new Vec3(0, 1.0, 0),
-            new Vec3(0, -1.0, 0),
-            new Vec3(-1.0, 0, 0),
-            new Vec3(1.0, 0, 0),
-            new Vec3(0, 0, 1.0),
-            new Vec3(0, 0, -1.0)
+            new Vec3( 0,   1.0, 0),
+            new Vec3( 0,  -1.0, 0),
+            new Vec3(-1.0, 0,   0),
+            new Vec3( 1.0, 0,   0),
+            new Vec3( 0,   0,   1.0),
+            new Vec3( 0,   0,  -1.0)
         ];
         var textureCoordArray = [
             // top
@@ -208,13 +210,13 @@ class WebRenderer {
             // back
             [1.0, 1.0], [1.0, 0.0], [0.0, 0.0],  [0.0, 0.0], [0.0, 1.0], [1.0, 1.0]
         ];
-        for (var i = 0; i < triangleIndex.length; i+=3) {
-            var vertices = [box.vertices[triangleIndex[i]], box.vertices[triangleIndex[i+1]], box.vertices[triangleIndex[i+2]]];
+        for (var i = 0; i < triangleIndex.length; i += 3) {
+            var vertices = [box.vertices[triangleIndex[i]], box.vertices[triangleIndex[i + 1]], box.vertices[triangleIndex[i + 2]]];
             var normalIndex = Math.floor(i / 6);
             var normal = normalArray[normalIndex].clone();
             var newModel = model.copy().getInverse().getTranspose().getMat3();
             normal = newModel.mulVec3(normal);
-            var textureCoord = [textureCoordArray[i], textureCoordArray[i+1], textureCoordArray[i+2]];
+            var textureCoord = [textureCoordArray[i], textureCoordArray[i + 1], textureCoordArray[i + 2]];
             var attr = {
                 "projection": proj,
                 "view": view,
@@ -230,6 +232,10 @@ class WebRenderer {
     }
 
     public vertexShader(vertices: Vertex[], attr: any, type: string) {
+        if (vertices.length !== 3) {
+            console.warn("WebRenderer.vertexShader: input vectices array's length not equal to 3.");
+        }
+
         var gl_Vertices = [];
         for (var i = 0; i < vertices.length; i++) {
             var gl_Position = attr.projection.mulMat4(attr.view).mulMat4(attr.model).mulVec3(vertices[i].position);
@@ -366,8 +372,6 @@ class WebRenderer {
                 "textureCoord": textureCoord
             }
             this.fragmentShader(frag, attr);
-            // color = color.mulScalar(255);
-            // this.drawPixel(x + i, y, new Color(color.x, color.y, color.z), 1.0, depth);
         }
     }
 
