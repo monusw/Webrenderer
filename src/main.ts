@@ -39,19 +39,17 @@ canvas.onclick = function (event:any) {
     enableAnimate = !enableAnimate;
 }
 
-ImageLoader.load("assets/container.png", function (img1: ImageData) {
-    ImageLoader.load("assets/container_specular.png", function (img2: ImageData) {
-        var texture = new Texture(img1, img2);
-        var material2 = new Material();
-        material2.diffuse = texture;
-        material2.shininess = 16;
-        box.material = material2;
-// uncomment to see different result;
-        // box.material = undefined;
-        // scene.removeChild(box2);
-        animate();
-    }); 
-});
+var texture = TextureLoader.createTexture()
+                           .loadDiffuse("assets/container.png")
+                           .loadSpecular("assets/container_specular.png")
+                           .getTexture();
+
+var material2 = new Material();
+material2.diffuse = texture;
+material2.shininess = 16;
+box.material = material2;
+
+animate();
 
 function animate() {
     if (enableAnimate) {
@@ -65,24 +63,3 @@ function animate() {
 
     requestAnimationFrame(animate);
 }
-
-
-// ======ONLY For Testing======
-
-// ImageLoader.load('2.jpg', function(data: ImageData) {
-//     console.log(data);
-// });
-// var mat = new Matrix4(
-//     1,24,3,4,
-//     5,6,11,8,
-//     9,10,20,12,
-//     13,14,10,16
-// );
-
-// var inv = mat.getInverse();
-// inv.print();
-// mat.print();
-
-// inv.mulMat4(mat).print();
-
-// ======Test End======

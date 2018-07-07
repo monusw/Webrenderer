@@ -418,20 +418,15 @@ class WebRenderer {
             var texture: Texture = material.diffuse;
             var diffuseTexture = texture.diffuse;
 
-            // ============= lyq add to avoid "possibly undefined"===============
-            if (typeof diffuseTexture === undefined) {
-                diffuseTexture = new ImageData(100, 100);
-            } else {
+            var diffuseColor: Vec3 = lightColor.clone();
+            if (diffuseTexture !== undefined) {
                 diffuseTexture = diffuseTexture as ImageData;
+                var x = Math.round(frag.textureCoord[0] * diffuseTexture.width);
+                var y = Math.round(frag.textureCoord[1] * diffuseTexture.height);
+                var index = (y*diffuseTexture.width + x) * 4;
+                var texColor = new Color(diffuseTexture.data[index], diffuseTexture.data[index+1], diffuseTexture.data[index+2]);
+                diffuseColor = texColor.normalize();
             }
-            // ============= lyq add to avoid "possibly undefined"===============
-
-            var x = Math.round(frag.textureCoord[0] * diffuseTexture.width);
-            var y = Math.round(frag.textureCoord[1] * diffuseTexture.height);
-            var index = (y*diffuseTexture.width + x) * 4;
-            var texColor = new Color(diffuseTexture.data[index], diffuseTexture.data[index+1], diffuseTexture.data[index+2]);
-
-            var diffuseColor = texColor.normalize();
 
             var specularColor: Vec3 = lightColor.clone();
             if (texture.specular !== undefined) {
@@ -498,7 +493,6 @@ class WebRenderer {
     }
 
     // private functions
-
     private drawBox(box: Box, camera: Camera, light?: Light) {
         var v_vec = [];
         var proj = camera.projectionMatrix;
