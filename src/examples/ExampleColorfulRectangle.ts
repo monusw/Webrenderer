@@ -1,7 +1,7 @@
 class ExampleColorfulRectangle {
     public static main() {
         var canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        var width = 800;
+        var width = 1000;
         var height = 800;
         var renderer = new WebRenderer(canvas, width, height);
 
@@ -19,7 +19,6 @@ class ExampleColorfulRectangle {
         box.setVertexColor(5, new Color(0x00ffff));
         box.setVertexColor(6, new Color(0xffffff));
         box.setVertexColor(7, new Color(0x000000));
-        // box.wireframe = true;
         scene.addChild(box);
 
         var enableAnimate = true;

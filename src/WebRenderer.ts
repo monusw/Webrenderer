@@ -258,7 +258,9 @@ class WebRenderer {
             var vec4 = v.gl_Position;
             var vec3 = new Vec3(vec4.x / vec4.w, vec4.y / vec4.w, vec4.z / vec4.w);
             v.depth = vec3.z;
-            vec3.addScalar(1.0).mulScalar(this.width / 2);
+            vec3.addScalar(1.0);
+            vec3.x *= this.width / 2;
+            vec3.y *= this.height / 2;
             vec3.y = this.height - vec3.y;
             vec3 = vec3.round();
             v.gl_Position = vec3;
