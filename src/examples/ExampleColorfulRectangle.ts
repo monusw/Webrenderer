@@ -1,8 +1,8 @@
 class ExampleColorfulRectangle {
     public static main() {
         var canvas = document.getElementById("canvas") as HTMLCanvasElement;
-        var width = 1000;
-        var height = 800;
+        var width = window.innerWidth;
+        var height = window.innerHeight;
         var renderer = new WebRenderer(canvas, width, height);
 
         var scene = new Scene();

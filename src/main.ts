@@ -1,1 +1,3 @@
-ExampleLightAndTextures.main();
+// ExampleLightAndTextures.main();
+
+ExampleColorfulRectangle.main();
